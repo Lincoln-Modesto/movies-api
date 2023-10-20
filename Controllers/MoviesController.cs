@@ -3,6 +3,7 @@ using EFCoreSqlServer.DataContext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using movies_api.Contracts;
+using movies_api.DTO;
 using movies_api.Entities;
 using movies_api.ViewModel;
 using System.Collections.Generic;
@@ -22,13 +23,20 @@ namespace EFCoreSqlServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Movie>>> GetMovies()
+        public async Task<ActionResult<IEnumerable<MovieDTO>>> GetMovies()
         {
             return Ok(await _moviesService.GetMovies());
         }
 
+        //Poderia ficar numa controller única para gêneros
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Gender>>> GetGenders()
+        {
+            return Ok(await _moviesService.GetGenders());
+        }
+
         [HttpPost]
-        public async Task<ActionResult<Movie>> CreateMovie([FromBody] MovieViewModel movieViewModel)
+        public async Task<ActionResult<MovieDTO>> CreateMovie([FromBody] MovieViewModel movieViewModel)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -45,7 +53,7 @@ namespace EFCoreSqlServer.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Movie>> UpdateMovie(int id, [FromBody] MovieViewModel movieViewModel)
+        public async Task<ActionResult<MovieDTO>> UpdateMovie(int id, [FromBody] MovieViewModel movieViewModel)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -72,7 +80,7 @@ namespace EFCoreSqlServer.Controllers
             return Ok(await _moviesService.DeleteMovie(id, movie));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete]
         public async Task<ActionResult<Movie>> DeleteMultipleMovies([FromBody] List<int> movieIds)
         {
             if (movieIds == null || !movieIds.Any())

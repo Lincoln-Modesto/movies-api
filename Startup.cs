@@ -32,6 +32,16 @@ namespace movies_api
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("SqlConnection")));
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAnyOrigin", builder =>
+                {
+                    builder.AllowAnyOrigin();
+                    builder.AllowAnyMethod();
+                    builder.AllowAnyHeader();
+                });
+            });
+
             services.AddControllers();
             services.AddScoped<IMoviesService, MoviesServices>();
             services.AddSwaggerGen(c =>
@@ -54,6 +64,8 @@ namespace movies_api
 
             app.UseRouting();
 
+            app.UseCors("AllowAnyOrigin");
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -61,7 +73,10 @@ namespace movies_api
                 endpoints.MapControllers();
             });
 
-            dbContext.InitializeGenders();
+            if (!dbContext.Genders.Any())
+            {
+                dbContext.InitializeGenders();
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using EFCoreSqlServer.DataContext;
 using Microsoft.EntityFrameworkCore;
 using movies_api.Contracts;
+using movies_api.DTO;
 using movies_api.Entities;
 using movies_api.ViewModel;
 using System;
@@ -13,27 +14,49 @@ namespace movies_api.Services
     public class MoviesServices : IMoviesService
     {
         private readonly ApplicationDbContext _moviesDbContext;
-        public MoviesServices(ApplicationDbContext moviesDbContext) 
+        public MoviesServices(ApplicationDbContext moviesDbContext)
         {
             _moviesDbContext = moviesDbContext;
         }
 
-        public async Task<IEnumerable<Movie>> GetMovies()
+        public async Task<IEnumerable<MovieDTO>> GetMovies()
         {
-            return await _moviesDbContext.Movies.ToListAsync();
+            var movies = await _moviesDbContext.Movies
+                    .Include(movie => movie.Gender)
+                    .Select(movie => new MovieDTO
+                    {
+                        MovieId = movie.MovieId,
+                        Name = movie.Name,
+                        GenderId = movie.GenderId,
+                        GenderName = movie.Gender.Name,
+                        Date = movie.Date,
+                        Active = movie.Active == 1
+                    })
+                    .ToListAsync();
+
+            return movies;
         }
 
         public async Task<List<Movie>> GetMoviesByListIds(List<int> movieIds)
         {
-           var movies = await _moviesDbContext.Movies
-                .Where(movie => movieIds.Contains(movie.MovieId))
-                .ToListAsync();
+            var movies = await _moviesDbContext.Movies
+                 .Where(movie => movieIds.Contains(movie.MovieId))
+                 .ToListAsync();
             return movies;
         }
 
         public async Task<Movie> GetMoviesById(int id)
         {
-            return await _moviesDbContext.Movies.FindAsync(id);
+            var movie = await _moviesDbContext.Movies
+                .Include(movie => movie.Gender)
+                .FirstOrDefaultAsync(movie => movie.MovieId == id);
+
+            if (movie == null)
+            {
+                return null;
+            }
+
+            return movie;
         }
 
         //Poderia ficar em uma camada de serviços apenas para os gêneros
@@ -43,7 +66,7 @@ namespace movies_api.Services
             return validGenres;
         }
 
-        public async Task<Movie> CreateMovie(MovieViewModel movieViewModel) 
+        public async Task<MovieDTO> CreateMovie(MovieViewModel movieViewModel)
         {
             var movie = new Movie
             {
@@ -55,16 +78,41 @@ namespace movies_api.Services
 
             await _moviesDbContext.Movies.AddAsync(movie);
             await _moviesDbContext.SaveChangesAsync();
-            return movie;
+
+            var movieDTO = new MovieDTO
+            {
+                MovieId = movie.MovieId,
+                Name = movie.Name,
+                GenderId = movie.GenderId,
+                GenderName = movie.Gender.Name,
+                Date = movie.Date,
+                Active = movie.Active == 1
+            };
+
+            return movieDTO;
         }
 
-        public async Task<Movie> UpdateMovie(MovieViewModel movieViewModel, Movie movie)
+        public async Task<MovieDTO> UpdateMovie(MovieViewModel movieViewModel, Movie movie)
         {
             movie.Name = movieViewModel.Name;
             movie.GenderId = movieViewModel.GenderId;
             movie.Active = movieViewModel.Active == true ? 1 : 0;
+            movie.Gender = await _moviesDbContext.Genders.FindAsync(movie.GenderId);
+            
+            _moviesDbContext.Update(movie);
             await _moviesDbContext.SaveChangesAsync();
-            return movie;
+
+            var movieDTO = new MovieDTO
+            {
+                MovieId = movie.MovieId,
+                Name = movie.Name,
+                GenderId = movie.GenderId,
+                GenderName = movie.Gender?.Name,
+                Date = movie.Date,
+                Active = movie.Active == 1
+            };
+
+            return movieDTO;
         }
 
         public async Task<string> DeleteMovie(int id, Movie movie)
