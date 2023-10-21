@@ -14,8 +14,19 @@ Api .NET CORE 5 + Entity Framework
     docker-compose up -f docker-compose-database.yml
     ```
 
-* ### Api
+    - Depois que o container do banco for devidamente criado, certifique-se de alterar o *Server=localhost* na sua connection string, no arquivo *appsettings.json*
 
+* ### Api
+    (certifique-se de ter o docker instalado na sua máquina) Na raiz do projeto, execute o comando
+
+    ```
+        docker-compose up
+    ```
+    Será executado um container da aplicação rodando na porta 32033
+
+    --------
+    Caso esteja utilizando o Microsoft Visual Studio como editor de código, basta abrir o arquivo .sln do projeto e executar a opção docker-compose
+    
 
 ## Schemas
 
@@ -42,8 +53,7 @@ Api .NET CORE 5 + Entity Framework
 ├── movies-api
     │── Contracts
     ├── Controllers
-    │   ├── MoviesController.cs
-    │
+    │   └── MoviesController.cs
     ├── DataContext
     ├── DTO
     ├── Entities
@@ -71,6 +81,8 @@ Api .NET CORE 5 + Entity Framework
 
 - Criar controller, services e regras de negócio para gêneros;
 - Criar controller, services e regras de negócio para locações;
+- Deploy do projeto
+- Testes nas entidades
 
 ### Poderia ter*
-- Variáveis de ambiente configuradas
+- Variáveis de ambiente configuradas;
