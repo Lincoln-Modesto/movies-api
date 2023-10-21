@@ -15,7 +15,7 @@ namespace EFCoreSqlServer.Controllers
     [ApiController]
     public class MoviesController : ControllerBase
     {
-        
+        //Camada de services para conectar-se ao dbContext e trabalhar nas regras de negócio
         private readonly IMoviesService _moviesService;
         public MoviesController(IMoviesService moviesService)
         {
@@ -38,11 +38,13 @@ namespace EFCoreSqlServer.Controllers
         [HttpPost]
         public async Task<ActionResult<MovieDTO>> CreateMovie([FromBody] MovieViewModel movieViewModel)
         {
+            //Verifica se o model passado no body da requisição é válido
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var validGenders = await _moviesService.GetGenders();
 
+            //Verifica se o gênero passado para a criação do filme é um gênero válido
             if (!movieViewModel.IsValid(validGenders))
             {
                 ModelState.AddModelError("GenderId", "Gênero inválido.");
@@ -55,6 +57,7 @@ namespace EFCoreSqlServer.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<MovieDTO>> UpdateMovie(int id, [FromBody] MovieViewModel movieViewModel)
         {
+            //Verifica se o model passado no body da requisição é válido
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 

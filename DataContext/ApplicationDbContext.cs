@@ -16,6 +16,8 @@ namespace EFCoreSqlServer.DataContext
         public DbSet<Gender> Genders { get; set; }
         public DbSet<Location> Locations { get; set; }
 
+        //Para Simplificar, decidi inicializar a tabela de gêneros com os gêneros abaixo, e assim, o usuário irá escolher apenas dentre os gêneros existentes
+        //Ao menos, numa primeira versão dessa aplicação, fator tempo foi determinante para essa tomada de decisão
         public void InitializeGenders()
         {
             var genders = new List<Gender>
